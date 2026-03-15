@@ -431,8 +431,8 @@ func TestConnPool_CleanupStale(t *testing.T) {
 			if err != nil {
 				return
 			}
-			// Keep connection open
-			time.Sleep(time.Minute)
+			// Keep connection open briefly
+			time.Sleep(time.Second)
 			conn.Close()
 		}
 	}()

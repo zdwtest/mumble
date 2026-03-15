@@ -16,16 +16,38 @@
 | pool | 84.6% | 80%+ | ✅ 达标 |
 | proxy | 83.8% | 80%+ | ✅ 达标 |
 | admin | 83.7% | 80%+ | ✅ 达标 |
+| **balancer** | **95.4%** | 80%+ | ✅ 新增 |
+| **discovery** | **79.3%** | 80%+ | 🔄 进行中 |
+| **registry** | **95.9%** | 80%+ | ✅ 新增 |
 
 ---
 
-## Phase 1: 提升测试覆盖率 ✅ 已完成
+## Phase 5: v1.1.0 企业增强版 🚧 进行中
 
-所有核心模块测试覆盖率已达到 80%+ 目标。
+### 5.1 服务发现模块
+- [x] 服务发现接口定义 (`internal/discovery/discovery.go`)
+- [x] 静态服务发现实现 (`internal/discovery/static.go`)
+- [x] Mock 服务发现实现 (用于测试)
+- [ ] Consul 服务发现支持
+- [ ] etcd 服务发现支持
+- [ ] Kubernetes 原生服务发现
+
+### 5.2 负载均衡模块
+- [x] 负载均衡接口定义 (`internal/balancer/balancer.go`)
+- [x] 轮询 (Round Robin)
+- [x] 加权轮询 (Weighted Round Robin)
+- [x] 最少连接 (Least Connections)
+- [x] 一致性哈希 (Consistent Hashing)
+- [x] 随机 (Random)
+
+### 5.3 服务注册中心
+- [x] 注册中心实现 (`internal/registry/registry.go`)
+- [x] 健康检查管理 (`internal/registry/health_checker.go`)
+- [x] 服务发现与负载均衡整合
 
 ---
 
-## Phase 2: 功能完善 ✅ 已完成
+## Phase 1-4: ✅ 已完成
 
 ### 2.1 核心功能
 - [x] 心跳/Ping-Pong 处理

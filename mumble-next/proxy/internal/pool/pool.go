@@ -132,7 +132,7 @@ func (p *ConnPool) Get(ctx context.Context) (net.Conn, error) {
 func (p *ConnPool) createNew() (net.Conn, error) {
 	p.createCount.Add(1)
 
-	addr := fmt.Sprintf("%s:%d", p.host, p.port)
+	addr := net.JoinHostPort(p.host, fmt.Sprintf("%d", p.port))
 	conn, err := net.DialTimeout("tcp", addr, p.connTimeout)
 	if err != nil {
 		p.createErrors.Add(1)

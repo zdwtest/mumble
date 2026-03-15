@@ -39,7 +39,7 @@
 - [x] 静态服务发现实现 (internal/discovery/static.go)
 - [x] Mock 服务发现实现 (用于测试)
 - [x] Consul 服务发现支持 (internal/discovery/consul.go)
-- [ ] etcd 服务发现支持
+- [x] etcd 服务发现支持 (internal/discovery/etcd.go)
 - [ ] Kubernetes 原生服务发现
 - [ ] 静态配置后端热更新
 

@@ -95,9 +95,10 @@ type EtcdConfig struct {
 
 // KubernetesConfig Kubernetes 配置
 type KubernetesConfig struct {
-	Enabled    bool   `mapstructure:"enabled"`
-	Namespace  string `mapstructure:"namespace"`
+	Enabled     bool   `mapstructure:"enabled"`
+	Namespace   string `mapstructure:"namespace"`
 	ServiceName string `mapstructure:"service_name"`
+	Kubeconfig  string `mapstructure:"kubeconfig"` // 可选的 kubeconfig 文件路径
 }
 
 // StaticConfig 静态配置

@@ -40,7 +40,7 @@
 - [x] Mock 服务发现实现 (用于测试)
 - [x] Consul 服务发现支持 (internal/discovery/consul.go)
 - [x] etcd 服务发现支持 (internal/discovery/etcd.go)
-- [ ] Kubernetes 原生服务发现
+- [x] Kubernetes 原生服务发现 (internal/discovery/kubernetes.go)
 - [ ] 静态配置后端热更新
 
 #### 负载均衡

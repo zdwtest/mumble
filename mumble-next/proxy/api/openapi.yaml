@@ -1,0 +1,234 @@
+openapi: 3.0.0
+info:
+  title: Mumble WebSocket Proxy API
+  description: |
+    WebSocket 代理服务，允许 Web 客户端连接到 Murmur 服务器。
+
+    ## 认证
+    当启用认证时，客户端需要在 WebSocket 连接时提供 Token：
+    - 通过 HTTP Header: `X-Mumble-Token: your-token`
+    - 通过 URL 参数: `?token=your-token`
+
+    ## WebSocket 协议
+    WebSocket 端点 (`/mumble`) 进行原始 TCP 数据转发，协议处理由客户端 mumble-client 库完成。
+  version: 1.0.0
+  contact:
+    name: Mumble Community
+    url: https://www.mumble.info
+
+servers:
+  - url: http://localhost:8080
+    description: 本地开发服务器
+
+paths:
+  /mumble:
+    get:
+      summary: WebSocket 端点
+      description: |
+        WebSocket 连接端点，用于代理 Mumble 协议流量。
+
+        连接后，客户端需要：
+        1. 发送版本信息
+        2. 发送认证消息
+        3. 接收服务器同步消息
+
+        所有消息使用 Protobuf 编码，通过 WebSocket Binary Message 传输。
+      operationId: websocket
+      tags:
+        - WebSocket
+      parameters:
+        - name: token
+          in: query
+          description: 认证 Token (如果启用了认证)
+          required: false
+          schema:
+            type: string
+      responses:
+        '101':
+          description: 协议切换成功，WebSocket 连接建立
+        '401':
+          description: 认证失败 (无效或缺失 Token)
+          content:
+            text/plain:
+              example: unauthorized
+        '429':
+          description: 连接数限制超出
+          content:
+            text/plain:
+              example: connection limit exceeded
+        '503':
+          description: 无法连接到 Murmur 服务器
+      x-websocket: true
+
+  /health:
+    get:
+      summary: 健康检查
+      description: 返回服务健康状态，包括 Murmur 连接检查结果
+      operationId: health
+      tags:
+        - Health
+      responses:
+        '200':
+          description: 服务健康
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: 服务不健康
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /healthz:
+    get:
+      summary: 存活检查
+      description: Kubernetes 存活探针端点
+      operationId: healthz
+      tags:
+        - Health
+      responses:
+        '200':
+          description: 服务存活
+          content:
+            text/plain:
+              example: OK
+
+  /readyz:
+    get:
+      summary: 就绪检查
+      description: Kubernetes 就绪探针端点
+      operationId: readyz
+      tags:
+        - Health
+      responses:
+        '200':
+          description: 服务就绪
+          content:
+            text/plain:
+              example: Ready
+        '503':
+          description: 服务未就绪
+          content:
+            text/plain:
+              example: Not Ready
+
+  /stats:
+    get:
+      summary: 连接统计
+      description: 返回当前连接统计信息
+      operationId: stats
+      tags:
+        - Stats
+      responses:
+        '200':
+          description: 统计信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+
+  /metrics:
+    get:
+      summary: Prometheus 指标
+      description: 返回 Prometheus 格式的监控指标
+      operationId: metrics
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Prometheus 指标
+          content:
+            text/plain:
+              example: |
+                # HELP mumble_proxy_active_connections Current number of active connections
+                # TYPE mumble_proxy_active_connections gauge
+                mumble_proxy_active_connections 5
+                # HELP mumble_proxy_total_connections Total number of connections
+                # TYPE mumble_proxy_total_connections counter
+                mumble_proxy_total_connections 1234
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+        - uptime
+        - checks
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: 整体健康状态
+        timestamp:
+          type: string
+          format: date-time
+          description: 检查时间
+        uptime:
+          type: string
+          description: 服务运行时间
+          example: "1h30m15s"
+        checks:
+          type: object
+          description: 各项检查结果
+          additionalProperties:
+            $ref: '#/components/schemas/Check'
+
+    Check:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+        latency_ms:
+          type: integer
+          description: 检查延迟 (毫秒)
+        error:
+          type: string
+          description: 错误信息 (如果有)
+
+    Stats:
+      type: object
+      required:
+        - status
+        - active_connections
+        - total_connections
+      properties:
+        status:
+          type: string
+          example: "ok"
+        active_connections:
+          type: integer
+          description: 当前活跃连接数
+          example: 5
+        total_connections:
+          type: integer
+          description: 总连接数
+          example: 1234
+        bytes_sent:
+          type: integer
+          description: 发送字节数
+          example: 1048576
+        bytes_received:
+          type: integer
+          description: 接收字节数
+          example: 2097152
+        uptime:
+          type: string
+          description: 服务运行时间
+          example: "1h30m15s"
+
+tags:
+  - name: WebSocket
+    description: WebSocket 端点
+  - name: Health
+    description: 健康检查端点
+  - name: Stats
+    description: 统计信息端点
+  - name: Monitoring
+    description: 监控指标端点

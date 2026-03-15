@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mumble-proxy
+  labels:
+    app: mumble-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+      name: http
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: metrics
+  selector:
+    app: mumble-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mumble-proxy-nodeport
+  labels:
+    app: mumble-proxy
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+      nodePort: 30080
+  selector:
+    app: mumble-proxy
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mumble-proxy
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - mumble.example.com
+      secretName: mumble-proxy-tls
+  rules:
+    - host: mumble.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mumble-proxy
+                port:
+                  number: 80

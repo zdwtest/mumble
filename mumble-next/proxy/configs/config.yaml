@@ -1,0 +1,54 @@
+# Mumble WebSocket Proxy 默认配置
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  tls:
+    enabled: false
+    cert_file: ""
+    key_file: ""
+
+murmur:
+  host: "localhost"
+  port: 64738
+  timeout: 10s
+  reconnect:
+    enabled: true
+    max_attempts: 3
+    delay: 5s
+
+# 多租户后端配置
+backends: []
+  # - name: "server1"
+  #   host: "mumble1.example.com"
+  #   port: 64738
+  #   tokens: ["token1", "token2"]
+  # - name: "server2"
+  #   host: "mumble2.example.com"
+  #   port: 64738
+  #   tokens: ["token3"]
+
+# 认证配置
+auth:
+  enabled: false
+  header: "X-Mumble-Token"
+  query_param: "token"
+
+# Prometheus 指标
+metrics:
+  enabled: true
+  port: 9090
+  path: /metrics
+
+# 日志配置
+logging:
+  level: info
+  format: json
+
+# 连接限制
+limits:
+  max_connections: 1000
+  max_connections_per_ip: 10
+  connection_timeout: 300s

@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  mumble-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+      - "9090:9090"
+    volumes:
+      - ./configs/config.yaml:/app/configs/config.yaml:ro
+    environment:
+      - MUMBLE_MURMUR_HOST=murmur
+      - MUMBLE_MURMUR_PORT=64738
+      - MUMBLE_LOGGING_LEVEL=info
+    depends_on:
+      - murmur
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+
+  murmur:
+    image: mumblevoip/mumble-server:latest
+    ports:
+      - "64738:64738/tcp"
+      - "64738:64738/udp"
+    environment:
+      - MUMBLE_SERVER_PASSWORD=
+      - MUMBLE_USERS=100
+    volumes:
+      - murmur-data:/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  murmur-data:
+  grafana-data:

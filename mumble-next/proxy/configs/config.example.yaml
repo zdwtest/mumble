@@ -1,0 +1,62 @@
+# Mumble WebSocket Proxy 示例配置
+# 复制此文件为 config.yaml 并根据需要修改
+
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  # TLS 配置 (可选)
+  tls:
+    enabled: false
+    cert_file: "/path/to/cert.pem"
+    key_file: "/path/to/key.pem"
+
+# 默认 Murmur 后端
+murmur:
+  host: "mumble.example.com"
+  port: 64738
+  timeout: 10s
+  # 重连配置
+  reconnect:
+    enabled: true
+    max_attempts: 3
+    delay: 5s
+
+# 多租户后端配置 (可选)
+# 启用后，客户端通过 Token 选择连接哪个后端
+backends:
+  - name: "production"
+    host: "mumble-prod.example.com"
+    port: 64738
+    tokens:
+      - "prod-token-1"
+      - "prod-token-2"
+  - name: "staging"
+    host: "mumble-staging.example.com"
+    port: 64738
+    tokens:
+      - "staging-token-1"
+
+# Token 认证配置
+auth:
+  enabled: true
+  header: "X-Mumble-Token"     # HTTP Header 名称
+  query_param: "token"          # URL 参数名称
+
+# Prometheus 指标
+metrics:
+  enabled: true
+  port: 9090
+  path: /metrics
+
+# 日志配置
+logging:
+  level: info      # debug, info, warn, error
+  format: json     # json, text
+
+# 连接限制
+limits:
+  max_connections: 1000
+  max_connections_per_ip: 10
+  connection_timeout: 300s

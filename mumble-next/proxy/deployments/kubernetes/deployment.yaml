@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mumble-proxy
+  labels:
+    app: mumble-proxy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mumble-proxy
+  template:
+    metadata:
+      labels:
+        app: mumble-proxy
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: mumble-proxy
+          image: mumble-proxy:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 9090
+              name: metrics
+          env:
+            - name: MUMBLE_MURMUR_HOST
+              value: "murmur-service"
+            - name: MUMBLE_MURMUR_PORT
+              value: "64738"
+            - name: MUMBLE_LOGGING_LEVEL
+              value: "info"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /app/configs
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: mumble-proxy-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mumble-proxy-config
+data:
+  config.yaml: |
+    server:
+      host: "0.0.0.0"
+      port: 8080
+    murmur:
+      host: "murmur-service"
+      port: 64738
+    metrics:
+      enabled: true
+      port: 9090
+    logging:
+      level: info
+      format: json

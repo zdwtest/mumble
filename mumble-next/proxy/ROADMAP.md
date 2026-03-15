@@ -38,7 +38,7 @@
 - [x] 服务发现接口定义 (internal/discovery/discovery.go)
 - [x] 静态服务发现实现 (internal/discovery/static.go)
 - [x] Mock 服务发现实现 (用于测试)
-- [ ] Consul 服务发现支持
+- [x] Consul 服务发现支持 (internal/discovery/consul.go)
 - [ ] etcd 服务发现支持
 - [ ] Kubernetes 原生服务发现
 - [ ] 静态配置后端热更新

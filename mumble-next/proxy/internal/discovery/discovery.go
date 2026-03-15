@@ -72,6 +72,18 @@ type ConsulConfig struct {
 	Address   string `mapstructure:"address"`
 	Token     string `mapstructure:"token"`
 	Namespace string `mapstructure:"namespace"`
+
+	// 服务注册配置
+	ServiceName string `mapstructure:"service_name"`
+
+	// 健康检查配置
+	HealthCheckPath     string        `mapstructure:"health_check_path"`
+	HealthCheckInterval time.Duration `mapstructure:"health_check_interval"`
+	HealthCheckTimeout  time.Duration `mapstructure:"health_check_timeout"`
+
+	// 监听配置
+	WatchEnabled  bool          `mapstructure:"watch_enabled"`
+	WatchInterval time.Duration `mapstructure:"watch_interval"`
 }
 
 // EtcdConfig Etcd 配置
